@@ -1,0 +1,12 @@
+{
+  "name": "adriang-portfolio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "cp -r public/ dist/"
+  },
+  "author": "A.G.",
+  "license": "ISC"
+}
