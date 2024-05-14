@@ -1,111 +1,183 @@
 pc.script.createLoadingScreen(function (app) {
-    var showSplash = function () {
-        // splash wrapper
-        var wrapper = document.createElement('div');
-        wrapper.id = 'application-splash-wrapper';
-        document.body.appendChild(wrapper);
+  var showSplash = function () {
+    // splash wrapper
+    var wrapper = document.createElement("div");
+    wrapper.id = "content";
+    document.body.appendChild(wrapper);
 
-        // splash
-        var splash = document.createElement('div');
-        splash.id = 'application-splash';
-        wrapper.appendChild(splash);
-        splash.style.display = 'none';
+    // splash
+    var splash = document.createElement("div");
+    splash.className = "logo";
+    wrapper.appendChild(splash);
+    splash.style.display = "none";
 
-        var logo = document.createElement('img');
-        logo.src = 'https://i.imgur.com/A9A43zQ.png';
-        splash.appendChild(logo);
-        logo.style.width = '200px'
-        logo.onload = function () {
-            splash.style.display = 'block';
-        };
-
-        var container = document.createElement('div');
-        container.id = 'progress-bar-container';
-        splash.appendChild(container);
-
-        var bar = document.createElement('div');
-        bar.id = 'progress-bar';
-        container.appendChild(bar);
-
+    var logo = document.createElement("img");
+    logo.src = "https://i.imgur.com/A9A43zQ.png";
+    splash.appendChild(logo);
+    logo.style.width = "200px";
+    logo.onload = function () {
+      splash.style.display = "block";
     };
 
-    var hideSplash = function () {
-        var splash = document.getElementById('application-splash-wrapper');
-        splash.parentElement.removeChild(splash);
-    };
+    var container = document.createElement("div");
+    container.id = "progress-bar-container";
+    splash.appendChild(container);
 
-    var setProgress = function (value) {
-        var bar = document.getElementById('progress-bar');
-        if(bar) {
-            value = Math.min(1, Math.max(0, value));
-            bar.style.width = value * 100 + '%';
-        }
-    };
+    var bar = document.createElement("div");
+    bar.id = "progress-bar";
+    container.appendChild(bar);
 
-    var createCss = function () {
-        var css = [
-            'body {',
-            '    background-color: #283538;',
-            '}',
-            '',
-            '#application-splash-wrapper {',
-            '    position: absolute;',
-            '    top: 0;',
-            '    left: 0;',
-            '    height: 100%;',
-            '    width: 100%;',
-            '    background-color: #283538;',
-            '}',
-            '',
-            '#application-splash {',
-            '    position: absolute;',
-            '    top: calc(50% - 178px);',
-            '    width: 200px;',
-            '    left: calc(50% - 132px);',
-            '}',
-            '',
-            '#application-splash img {',
-            '    width: 100%;',
-            '}',
-            '',
-            '#progress-bar-container {',
-            '    margin: 20px auto 0 auto;',
-            '    height: 2px;',
-            '    width: 100%;',
-            '    background-color: #1d292c;',
-            '}',
-            '',
-            '#progress-bar {',
-            '    width: 0%;',
-            '    height: 100%;',
-            '    background-color: #f60;',
-            '}',
-            '',
-            '@media (max-width: 480px) {',
-            '    #application-splash {',
-            '        width: 170px;',
-            '        left: calc(50% - 85px);',
-            '    }',
-            '}'
-        ].join('\n');
+    var message = document.createElement("div");
+    message.id = "portrait-mobile-message";
+    message.innerHTML = "Please rotate your device to landscape mode";
+    message.style.color = "white";
+    message.style.overflow = "hidden";
+    message.style.display = "none";
+    container.appendChild(message);
 
-        var style = document.createElement('style');
-        style.type = 'text/css';
-        if (style.styleSheet) {
-            style.styleSheet.cssText = css;
-        } else {
-            style.appendChild(document.createTextNode(css));
-        }
+    if (mobileCheck()) {
+      //update img style to be position relative, left 50%
+      logo.style.position = "relative";
+      logo.style.left = "20%";
+      if (window.screen.orientation.angle === 0) {
+        message.style.display = "block";
+      }
+    }
+  };
 
-        document.head.appendChild(style);
-    };
+  var hideSplash = function () {
+    //if the user is not in portrait mode on mobile
+    if (mobileCheck()) {
+      if (window.screen.orientation.angle === 0) {
+        return;
+      }
+    }
 
-    createCss();
-    showSplash();
+    var splash = document.getElementById("content");
+    if (!splash || !splash.parentElement) return;
+    splash.parentElement.removeChild(splash);
+  };
 
-    app.on('preload:end', function () {
-        app.off('preload:progress');
-    });
-    app.on('preload:progress', setProgress);
-    app.on('start', hideSplash);
+  var setProgress = function (value) {
+    var bar = document.getElementById("progress-bar");
+    if (bar) {
+      value = Math.min(1, Math.max(0, value));
+      bar.style.width = value * 100 + "%";
+    }
+  };
+
+  //listener for mobile orientation change
+  window.addEventListener("orientationchange", function () {
+    if (window.screen.orientation.angle === 0) {
+      showSplash();
+    } else {
+      if (document.getElementById("portrait-mobile-message")) {
+        document.getElementById("portrait-mobile-message").style.display =
+          "none";
+      }
+      hideSplash();
+    }
+  });
+
+  //check if the user is on a mobile device
+  window.mobileCheck = function () {
+    let check = false;
+    (function (a) {
+      if (
+        /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(
+          a
+        ) ||
+        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
+          a.substr(0, 4)
+        )
+      )
+        check = true;
+    })(navigator.userAgent || navigator.vendor || window.opera);
+    return check;
+  };
+
+  var createCss = function () {
+    var css = [
+      "body {",
+      "    background-color: #283538;",
+      "}",
+      "",
+      "#application-splash-wrapper {",
+      "    position: absolute;",
+      "    top: 0;",
+      "    left: 0;",
+      "    height: 100%;",
+      "    width: 100%;",
+      "    background-color: #283538;",
+      "}",
+      "#content{",
+      "height : 100vh;",
+      "position : absolute;",
+      "width : 100vw;",
+      " display : flex;",
+      "    background-color: #283538;",
+      " flex-direction : column;",
+      "align-items: center;",
+      " justify-content : space-around;",
+      "  }",
+      " .logo{",
+      "flex:1 1 auto;",
+      "position : absolute;",
+      "display:flex;",
+      " flex-direction :column;",
+      "justify-content : center;",
+      "align-items : center;",
+      "  }",
+      "",
+      "#application-splash {",
+      "    position: absolute;",
+      "    top: calc(50% - 178px);",
+      "    width: 200px;",
+      "    left: calc(50% - 132px);",
+      "}",
+      "",
+      "#application-splash img {",
+      "    width: 100%;",
+      "}",
+      "",
+      "#progress-bar-container {",
+      "    margin: 20px auto 0 auto;",
+      "    height: 2px;",
+      "    width: 100%;",
+      "    background-color: #1d292c;",
+      "}",
+      "",
+      "#progress-bar {",
+      "    width: 0%;",
+      "    height: 100%;",
+      "    background-color: #f60;",
+      "}",
+      "",
+      "@media (max-width: 480px) {",
+      "    #application-splash {",
+      "        width: 170px;",
+      "        left: calc(50% - 85px);",
+      "    }",
+      "}",
+    ].join("\n");
+
+    var style = document.createElement("style");
+    style.type = "text/css";
+    if (style.styleSheet) {
+      style.styleSheet.cssText = css;
+    } else {
+      style.appendChild(document.createTextNode(css));
+    }
+
+    document.head.appendChild(style);
+  };
+
+  createCss();
+  showSplash();
+
+  app.on("preload:end", function () {
+    app.off("preload:progress");
+  });
+  app.on("preload:progress", setProgress);
+  app.on("start", hideSplash);
 });
